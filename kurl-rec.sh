@@ -79,7 +79,7 @@ log() { echo "[kurl-rec $(date +%H:%M:%S)] $*"; }
 resolve_twitch() {
   # Ask Twitch for a playback token, then build the usher master URL.
   local resp sig val master varurl
-  resp="$(curl -s -X POST 'https://gql.twitch.tv/gql' \
+  resp="$(curl -sLf -X POST 'https://gql.twitch.tv/gql' \
     -H "Client-Id: $TWITCH_CLIENT_ID" -H "User-Agent: $UA" \
     -d "{\"operationName\":\"PlaybackAccessToken_Template\",\"query\":\"query PlaybackAccessToken_Template(\\$login: String!, \\$isLive: Boolean!, \\$vodID: ID!, \\$isVod: Boolean!, \\$playerType: String!) { streamPlaybackAccessToken(channel: \\$login, params: {platform: \\\"web\\\", playerBackend: \\\"mediaplayer\\\", playerType: \\$playerType}) @include(if: \\$isLive) { value signature __typename } }\",\"variables\":{\"isLive\":true,\"login\":\"$SOURCE\",\"isVod\":false,\"vodID\":\"\",\"playerType\":\"site\"}}")" || return 1
   if command -v python3 >/dev/null; then
@@ -92,7 +92,7 @@ EOF
     val="$(printf '%s' "$resp" | sed -n 's/.*"value":"\(.*\)","__typename".*/\1/p' | head -1 | sed 's/\\"/"/g; s/\\\\/\\/g')"
   fi
   [ -n "$sig" ] && [ -n "$val" ] || return 1
-  master="$(curl -s -G 'https://usher.ttvnw.net/api/channel/hls/'"$SOURCE"'.m3u8' \
+  master="$(curl -sLf -G 'https://usher.ttvnw.net/api/channel/hls/'"$SOURCE"'.m3u8' \
     --data-urlencode "token=$val" -d "sig=$sig" -d 'allow_source=true' \
     -H "User-Agent: $UA")" || return 1
   varurl="$(printf '%s\n' "$master" | grep -A1 "NAME=\"$QUALITY\"" | grep '^http' | head -1)"
@@ -113,7 +113,7 @@ resolve_url() {
   # If SOURCE is a master playlist, pick variant N; if it's already a media
   # playlist, use it as-is.
   local master varurl
-  master="$(curl -s -H "User-Agent: $UA" "$SOURCE")" || return 1
+  master="$(curl -sLf -H "User-Agent: $UA" "$SOURCE")" || return 1
   if printf '%s' "$master" | grep -q 'EXT-X-STREAM-INF'; then
     varurl="$(printf '%s\n' "$master" | grep '^http' | sed -n "$((VARIANT+1))p")"
     if [ -z "$varurl" ]; then
@@ -147,7 +147,7 @@ log "recording -> $OUT  (poll ${POLL}s)"
 
 FAILS=0
 while true; do
-  PL="$(curl -s --max-time 15 -H "User-Agent: $UA" "$MEDIA")" || PL=""
+  PL="$(curl -sLf --max-time 15 -H "User-Agent: $UA" "$MEDIA")" || PL=""
   if [ -z "$PL" ]; then
     FAILS=$((FAILS+1))
     if [ "$MODE" = "twitch" ] && [ "$FAILS" -ge 8 ]; then
@@ -169,7 +169,7 @@ while true; do
     esac
     if ! grep -qxF "$SEG" "$SEEN"; then
       TMP="$WORKDIR/seg.tmp"
-      if curl -s --max-time 30 -H "User-Agent: $UA" -o "$TMP" "$SEG" && [ -s "$TMP" ]; then
+      if curl -sLf --max-time 30 -H "User-Agent: $UA" -o "$TMP" "$SEG" && [ -s "$TMP" ]; then
         cat "$TMP" >> "$OUT"
         echo "$SEG" >> "$SEEN"
         NEW=$((NEW+1))

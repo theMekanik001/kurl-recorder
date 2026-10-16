@@ -1,6 +1,6 @@
 # kurl-recorder
 
-**A tiny, curl-only HLS live-stream recorder.** bash + curl + coreutils — nothing else to install, nothing else to break.
+**A tiny, curl-only live-stream recorder kit.** Two scripts — `kurl-rec.sh` for HLS, `kurl-dash.sh` for DASH — bash + curl + coreutils, nothing else to install, nothing else to break.
 
 by **theMekanik** & **Ding Dong** 🐱
 
@@ -22,6 +22,17 @@ kurl-recorder was born on a day when ffmpeg *and* yt-dlp both failed to record a
 - **Twitch mode:** resolves its own signed playback token — and **re-resolves it automatically** when the session starts failing. When the key dies, it asks for a new key instead of quitting.
 - Exits cleanly on `#EXT-X-ENDLIST`
 
+## kurl-dash — the DASH sibling
+
+Same doctrine, different manifest. DASH streams describe themselves in an XML manifest (an MPD); kurl-dash polls it, picks the best video + the audio adaptation set, and appends init + media segments into directly playable fragmented-MP4 files (`<out>-video.mp4`, `<out>-audio.mp4`). Supports SegmentTemplate (`$Number$`, `$Time$`, SegmentTimeline) and SegmentList manifests, joins live streams at the live edge, and holds back `--lag` segments so it never chases a half-written one.
+
+```bash
+./kurl-dash.sh --url https://example.com/live/manifest.mpd -o stream
+ffmpeg -i stream-video.mp4 -i stream-audio.mp4 -c copy stream.mp4   # mux when done
+```
+
+Hardening shared by both scripts: fetches use `curl --fail`, so an HTTP error page can never be mistaken for a segment and stitched into your recording.
+
 ## Usage
 
 ```bash
@@ -41,7 +52,7 @@ kurl-recorder was born on a day when ffmpeg *and* yt-dlp both failed to record a
 ./kurl-rec.sh --twitch somestreamer --quality 720p --poll 5 -o stream.ts
 ```
 
-**Platform support:** the engine records *any* HLS stream you can hand it a playable playlist URL for. Built-in resolvers: **Twitch** and **Kick**. **YouTube Live** and **TikTok Live** work in `--url` mode with a manifest URL extracted by other tools (theirs hide behind signed page/API responses; resolvers are future work). **Instagram Live** is login-walled and not supported.
+**Platform support:** the engine records *any* HLS stream you can hand it a playable playlist URL for. Built-in resolvers: **Twitch** and **Kick**. **YouTube Live** and **TikTok Live** work in `--url` mode with a manifest URL extracted by other tools (theirs hide behind signed page/API responses; resolvers are future work). **Instagram Live** serves DASH — anonymous access is walled, but with an authenticated session it's reachable: the signed-in client is handed the MPD address, and `kurl-dash.sh` records from there.
 
 Output is a raw MPEG-TS stream copy. Remux when you're done:
 
