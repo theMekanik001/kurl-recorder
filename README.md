@@ -2,7 +2,7 @@
 
 **A tiny, curl-only live-stream recorder kit.** Two scripts — `kurl-rec.sh` for HLS, `kurl-dash.sh` for DASH — bash + curl + coreutils, nothing else to install, nothing else to break.
 
-by **theMekanik** & **Ding Dong** 🐱
+by **theMekanik** & **Ding Dong** 😺
 
 ## Why this exists
 
