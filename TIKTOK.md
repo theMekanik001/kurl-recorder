@@ -33,7 +33,8 @@ Restarting with the same `-o` resumes appending to the same partial file. A seal
 
 ## Credits, in the order the universe provided them
 
-- **Irina — [@irene.blaire](https://www.tiktok.com/@irene.blaire)** — the inspiration. Her live streams (Oct 6–7, 2026) were captured while HLS was busy 403-ing us: the FLV route worked *then*, clear-screen, full streams, remuxed and verified. Today's doctrine is just her door, finally understood.
+- **Kriss Drummer (Kristina Rybalchenko)** — the original inspiration, full stop. kurl exists because of her Twitch streams: the recorder was built to capture them, and every sibling tool since is her idea's children. The Twitch tool is hers in spirit; this TikTok chapter is a grandchild.
+- **Irina — [@irene.blaire](https://www.tiktok.com/@irene.blaire)** — the inspiration for the TikTok chapter. Her live streams (Oct 6–7, 2026) were captured while HLS was busy 403-ing us: the FLV route worked *then*, clear-screen, full streams, remuxed and verified. Today's doctrine is just her door, finally understood.
 - **Yulia — [@yuliaalexeeva02](https://www.tiktok.com/@yuliaalexeeva02)** — the test subject. Her marathon live (Oct 20, 2026) absorbed the full afternoon of failed knocks — curl 404s, ffmpeg skips, a power-of-attorney HLS attempt that failed in the attorney's own hands — and then recorded clean through the FLV hose the moment we asked the right door. She just sat there and kept the stream going. Wear whatever you want; that's the whole job, and she did it perfectly.
 
 ## License
